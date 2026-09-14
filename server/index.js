@@ -19,6 +19,9 @@ import { startKeepAlive } from './keep-alive.js'
 const app  = express()
 const PORT = process.env.PORT || 4000
 
+// ── Trust Render's proxy (required for rate limiting + OAuth) ─
+app.set('trust proxy', 1)
+
 // ── Security middleware ───────────────────────────────────────
 app.use(helmet())
 app.use(cors({
