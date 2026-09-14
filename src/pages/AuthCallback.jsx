@@ -14,8 +14,11 @@ export default function AuthCallback() {
       navigate('/login?error=1', { replace: true })
       return
     }
-    saveToken(token)
-    navigate('/', { replace: true })
+    saveToken(token).then(() => {
+      navigate('/', { replace: true })
+    }).catch(() => {
+      navigate('/login?error=1', { replace: true })
+    })
   }, [])
 
   return (

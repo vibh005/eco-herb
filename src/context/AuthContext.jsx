@@ -33,12 +33,15 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
-  // Called by AuthCallback page after OAuth redirect
-  const saveToken = (token) => {
+  // Called by AuthCallback page after OAuth redirect — returns a promise
+  const saveToken = async (token) => {
     localStorage.setItem('token', token)
-    api.get('/api/auth/me')
-      .then(res => setUser(res.data))
-      .catch(() => {})
+    try {
+      const res = await api.get('/api/auth/me')
+      setUser(res.data)
+    } catch {
+      localStorage.removeItem('token')
+    }
   }
 
   const isAdmin = Boolean(user?.is_admin)
