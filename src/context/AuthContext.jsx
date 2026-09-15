@@ -1,60 +1,64 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import api from '../lib/api'
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "../lib/api";
 
-const AuthContext = createContext({})
+const AuthContext = createContext({});
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // On mount, if a token exists, verify it with the server
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem("token");
     if (!token) {
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
-    api.get('/api/auth/me')
-      .then(res => setUser(res.data))
+    api
+      .get("/api/auth/me")
+      .then((res) => setUser(res.data))
       .catch(() => {
-        localStorage.removeItem('token')
-        setUser(null)
+        localStorage.removeItem("token");
+        setUser(null);
       })
-      .finally(() => setLoading(false))
-  }, [])
+      .finally(() => setLoading(false));
+  }, []);
 
   // Redirect browser to backend Google OAuth — no popup needed
   const signInWithGoogle = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`
-  }
+    const base = import.meta.env.VITE_API_URL || "";
+    window.location.href = `${base}/api/auth/google`;
+  };
 
   const signOut = () => {
-    localStorage.removeItem('token')
-    setUser(null)
-  }
+    localStorage.removeItem("token");
+    setUser(null);
+  };
 
   // Called by AuthCallback page after OAuth redirect — returns a promise
   const saveToken = async (token) => {
-    localStorage.setItem('token', token)
+    localStorage.setItem("token", token);
     try {
-      const res = await api.get('/api/auth/me')
-      setUser(res.data)
+      const res = await api.get("/api/auth/me");
+      setUser(res.data);
     } catch {
-      localStorage.removeItem('token')
+      localStorage.removeItem("token");
     }
-  }
+  };
 
-  const isAdmin = Boolean(user?.is_admin)
+  const isAdmin = Boolean(user?.is_admin);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, saveToken, isAdmin }}>
+    <AuthContext.Provider
+      value={{ user, loading, signInWithGoogle, signOut, saveToken, isAdmin }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used within AuthProvider')
-  return context
-}
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
+};
